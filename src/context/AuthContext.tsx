@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { apiFetch, setStoredSessionToken } from '../lib/api';
+import { apiFetch, registerUnauthorizedHandler, setStoredSessionToken } from '../lib/api';
 import type { AuthUser } from '../types/common';
 
 interface AuthContextValue {
@@ -40,7 +40,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    registerUnauthorizedHandler(() => {
+      setUser(null);
+    });
     refreshUser();
+    return () => {
+      registerUnauthorizedHandler(null);
+    };
   }, [refreshUser]);
 
   const login = async (email: string, password: string) => {
@@ -80,9 +86,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    await apiFetch<{ ok: boolean }>('/api/auth/logout', { method: 'POST' });
-    setStoredSessionToken(null);
-    setUser(null);
+    try {
+      await apiFetch<{ ok: boolean }>('/api/auth/logout', { method: 'POST' });
+    } finally {
+      setStoredSessionToken(null);
+      setUser(null);
+    }
   };
 
   return (

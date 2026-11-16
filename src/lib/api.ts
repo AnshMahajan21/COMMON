@@ -10,16 +10,37 @@ export class ApiError extends Error {
 }
 
 const SESSION_STORAGE_KEY = 'common_session_token';
+let unauthorizedHandler: (() => void) | null = null;
+
+export function registerUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
+}
 
 export function getStoredSessionToken(): string | null {
   try {
-    return window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    return (
+      window.localStorage.getItem(SESSION_STORAGE_KEY) ||
+      window.sessionStorage.getItem(SESSION_STORAGE_KEY)
+    );
   } catch {
-    return null;
+    try {
+      return window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    } catch {
+      return null;
+    }
   }
 }
 
 export function setStoredSessionToken(token: string | null) {
+  try {
+    if (token) {
+      window.localStorage.setItem(SESSION_STORAGE_KEY, token);
+    } else {
+      window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
   try {
     if (token) {
       window.sessionStorage.setItem(SESSION_STORAGE_KEY, token);
@@ -55,9 +76,13 @@ export async function apiFetch<T>(url: string, options: RequestInit = {}): Promi
   if (!res.ok) {
     if (res.status === 401 && !url.startsWith('/api/auth/')) {
       setStoredSessionToken(null);
+      unauthorizedHandler?.();
     }
     throw new ApiError(
-      data.error || 'Request could not be completed. Please try again.',
+      data.error ||
+        (res.status === 401
+          ? 'Authentication required. Please sign in.'
+          : 'Request could not be completed. Please try again.'),
       res.status,
       data.fieldErrors
     );

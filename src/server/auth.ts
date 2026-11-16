@@ -1,11 +1,56 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import type { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 
-export const prisma = new PrismaClient();
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+function createPrismaClient(): PrismaClient {
+  const isServerless = Boolean(
+    process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_REGION
+  );
+  const rawUrl = process.env.DATABASE_URL?.trim();
+
+  if (
+    isServerless &&
+    (!rawUrl || rawUrl.startsWith('file:./') || rawUrl.startsWith('file:../'))
+  ) {
+    const tmpDbPath = '/tmp/common-dev.db';
+    if (!fs.existsSync(tmpDbPath)) {
+      const bundledCandidates = [
+        path.resolve(process.cwd(), 'prisma/dev.db'),
+        path.resolve(process.cwd(), 'dev.db'),
+        path.resolve(MODULE_DIR, '../../prisma/dev.db'),
+      ];
+      const source = bundledCandidates.find((candidate) => fs.existsSync(candidate));
+      if (source) {
+        fs.copyFileSync(source, tmpDbPath);
+      }
+    }
+    const tmpUrl = `file:${tmpDbPath}`;
+    process.env.DATABASE_URL = tmpUrl;
+    return new PrismaClient({ datasources: { db: { url: tmpUrl } } });
+  }
+
+  if (!rawUrl) {
+    const localDbPath = path.resolve(process.cwd(), 'prisma/dev.db');
+    const fallbackUrl = `file:${localDbPath}`;
+    process.env.DATABASE_URL = fallbackUrl;
+    return new PrismaClient({ datasources: { db: { url: fallbackUrl } } });
+  }
+
+  return new PrismaClient();
+}
+
+export const prisma = createPrismaClient();
 
 export const SESSION_COOKIE_NAME = 'common_session';
 const SESSION_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+const TOKEN_VERSION = 'v1';
+const SESSION_SECRET =
+  process.env.SESSION_SECRET?.trim() || 'common-app-session-hmac-secret-2026';
 
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -24,7 +69,58 @@ export function verifyPassword(password: string, storedHash: string): boolean {
   return crypto.timingSafeEqual(derived, original);
 }
 
+function signSessionToken(userId: string, email: string): string {
+  const payload = {
+    uid: userId,
+    email,
+    exp: Date.now() + SESSION_DURATION_MS,
+    jti: crypto.randomBytes(8).toString('hex'),
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+  const signingInput = `${TOKEN_VERSION}.${payloadB64}`;
+  const sigHex = crypto
+    .createHmac('sha256', SESSION_SECRET)
+    .update(signingInput)
+    .digest('hex');
+  return `${signingInput}.${sigHex}`;
+}
+
+function verifySignedSessionToken(
+  token: string
+): { uid: string; email: string; exp: number } | null {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [version, payloadB64, sigHex] = parts;
+  if (version !== TOKEN_VERSION || !payloadB64 || !sigHex) return null;
+
+  const expectedHex = crypto
+    .createHmac('sha256', SESSION_SECRET)
+    .update(`${version}.${payloadB64}`)
+    .digest('hex');
+
+  const sigBuf = Buffer.from(sigHex, 'hex');
+  const expectedBuf = Buffer.from(expectedHex, 'hex');
+  if (sigBuf.length === 0 || sigBuf.length !== expectedBuf.length) return null;
+  if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
+
+  try {
+    const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    if (
+      typeof parsed?.uid !== 'string' ||
+      typeof parsed?.email !== 'string' ||
+      typeof parsed?.exp !== 'number' ||
+      parsed.exp <= Date.now()
+    ) {
+      return null;
+    }
+    return { uid: parsed.uid, email: parsed.email, exp: parsed.exp };
+  } catch {
+    return null;
+  }
+}
+
 function isHttpsRequest(req: Request): boolean {
+  if (process.env.VERCEL) return true;
   const forwardedProto = req.headers['x-forwarded-proto'];
   if (typeof forwardedProto === 'string' && forwardedProto.split(',')[0].trim() === 'https') {
     return true;
@@ -33,33 +129,54 @@ function isHttpsRequest(req: Request): boolean {
   if (typeof origin === 'string' && origin.startsWith('https://')) {
     return true;
   }
+  const referer = req.headers.referer;
+  if (typeof referer === 'string' && referer.startsWith('https://')) {
+    return true;
+  }
   return Boolean(req.secure);
 }
 
-function extractSessionToken(req: Request): string | null {
-  const cookieToken = req.cookies?.[SESSION_COOKIE_NAME];
-  if (typeof cookieToken === 'string' && cookieToken.length > 0) {
-    return cookieToken;
-  }
+function extractSessionTokens(req: Request): string[] {
+  const tokens: string[] = [];
   const authHeader = req.headers.authorization;
   if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
     const bearer = authHeader.slice(7).trim();
-    if (bearer.length > 0) return bearer;
+    if (bearer.length > 0) tokens.push(bearer);
   }
-  return null;
+  const cookieToken = req.cookies?.[SESSION_COOKIE_NAME];
+  if (typeof cookieToken === 'string' && cookieToken.length > 0 && !tokens.includes(cookieToken)) {
+    tokens.push(cookieToken);
+  }
+  return tokens;
 }
 
-export async function createSessionForUser(req: Request, res: Response, userId: string) {
-  const token = crypto.randomBytes(32).toString('hex');
+export async function createSessionForUser(
+  req: Request,
+  res: Response,
+  userId: string,
+  userEmail?: string
+) {
+  let email = userEmail || '';
+  if (!email) {
+    const userRow = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    email = userRow?.email || '';
+  }
+
+  const token = signSessionToken(userId, email);
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 
-  await prisma.session.create({
-    data: {
-      token,
-      userId,
-      expiresAt,
-    },
-  });
+  await prisma.session
+    .create({
+      data: {
+        token,
+        userId,
+        expiresAt,
+      },
+    })
+    .catch(() => {});
 
   const isHttps = isHttpsRequest(req);
   res.cookie(SESSION_COOKIE_NAME, token, {
@@ -74,9 +191,9 @@ export async function createSessionForUser(req: Request, res: Response, userId: 
 }
 
 export async function clearSession(req: Request, res: Response) {
-  const token = extractSessionToken(req);
-  if (token) {
-    await prisma.session.deleteMany({ where: { token } });
+  const tokens = extractSessionTokens(req);
+  if (tokens.length > 0) {
+    await prisma.session.deleteMany({ where: { token: { in: tokens } } }).catch(() => {});
   }
   const isHttps = isHttpsRequest(req);
   res.clearCookie(SESSION_COOKIE_NAME, {
@@ -86,30 +203,54 @@ export async function clearSession(req: Request, res: Response) {
   });
 }
 
-export async function getAuthenticatedUser(req: Request) {
-  const token = extractSessionToken(req);
-  if (!token) return null;
+const USER_WITH_INTERESTS = {
+  interests: {
+    include: { interest: true },
+  },
+} as const;
 
-  const session = await prisma.session.findUnique({
-    where: { token },
-    include: {
-      user: {
-        include: {
-          interests: {
-            include: { interest: true },
-          },
+export async function getAuthenticatedUser(req: Request) {
+  const tokens = extractSessionTokens(req);
+  if (tokens.length === 0) return null;
+
+  for (const token of tokens) {
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: {
+        user: {
+          include: USER_WITH_INTERESTS,
         },
       },
-    },
-  });
+    });
 
-  if (!session) return null;
-  if (session.expiresAt < new Date()) {
-    await prisma.session.delete({ where: { id: session.id } }).catch(() => {});
-    return null;
+    if (session) {
+      if (session.expiresAt < new Date()) {
+        await prisma.session.delete({ where: { id: session.id } }).catch(() => {});
+        continue;
+      }
+      return session.user;
+    }
+
+    // Stateless HMAC fallback for serverless / multi-instance deployments
+    const verified = verifySignedSessionToken(token);
+    if (verified) {
+      const userById = await prisma.user.findUnique({
+        where: { id: verified.uid },
+        include: USER_WITH_INTERESTS,
+      });
+      if (userById) return userById;
+
+      if (verified.email) {
+        const userByEmail = await prisma.user.findUnique({
+          where: { email: verified.email },
+          include: USER_WITH_INTERESTS,
+        });
+        if (userByEmail) return userByEmail;
+      }
+    }
   }
 
-  return session.user;
+  return null;
 }
 
 export type AuthenticatedRequest = Request & {

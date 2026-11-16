@@ -1,12 +1,8 @@
-import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import { createServer as createViteServer } from 'vite';
-import { attachAuthUser, prisma } from './src/server/auth';
-import { apiRouter } from './src/server/routes';
-import { seedDatabase } from './prisma/seed';
+import { attachErrorHandler, createApiApp } from './src/server/app';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const portFlagIndex = process.argv.indexOf('--port');
@@ -17,20 +13,8 @@ const PORT =
 const isProd = process.env.NODE_ENV === 'production';
 
 async function bootstrap() {
-  await seedDatabase(false);
-
-  const app = express();
-  app.set('trust proxy', 1);
-  app.use(express.json({ limit: '1mb' }));
-  app.use(cookieParser());
-  app.use(attachAuthUser);
-
-  app.get('/api/health', async (_req, res) => {
-    await prisma.$queryRaw`SELECT 1`;
-    res.json({ ok: true });
-  });
-
-  app.use('/api', apiRouter);
+  const { app, ensureSeeded } = createApiApp();
+  await ensureSeeded();
 
   if (!isProd) {
     const vite = await createViteServer({
@@ -46,10 +30,7 @@ async function bootstrap() {
     });
   }
 
-  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error('Server error:', err);
-    res.status(500).json({ error: 'Something went wrong on our server. Please try again.' });
-  });
+  attachErrorHandler(app);
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`COMMON server running on http://localhost:${PORT}`);

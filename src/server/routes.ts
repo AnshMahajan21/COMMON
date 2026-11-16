@@ -288,7 +288,7 @@ apiRouter.post('/auth/signup', async (req, res) => {
     },
   });
 
-  const sessionToken = await createSessionForUser(req, res, user.id);
+  const sessionToken = await createSessionForUser(req, res, user.id, user.email);
   return res.status(201).json({ user: serializeUserPrivate(user), sessionToken });
 });
 
@@ -315,7 +315,7 @@ apiRouter.post('/auth/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
-  const sessionToken = await createSessionForUser(req, res, user.id);
+  const sessionToken = await createSessionForUser(req, res, user.id, user.email);
   return res.json({ user: serializeUserPrivate(user), sessionToken });
 });
 
@@ -336,7 +336,7 @@ apiRouter.post('/auth/demo', async (req, res) => {
     return res.status(404).json({ error: 'Demo account not found in database.' });
   }
 
-  const sessionToken = await createSessionForUser(req, res, user.id);
+  const sessionToken = await createSessionForUser(req, res, user.id, user.email);
   return res.json({ user: serializeUserPrivate(user), sessionToken });
 });
 

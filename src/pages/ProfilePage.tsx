@@ -33,8 +33,10 @@ export function ProfilePage() {
     }
   }, [authLoading, user, navigate]);
 
+  const userId = user?.id;
+
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     let active = true;
     setLoading(true);
     Promise.all([
@@ -70,7 +72,7 @@ export function ProfilePage() {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [userId]);
 
   const toggleInterest = (id: string) => {
     setSelectedInterestIds((prev) =>
