@@ -3,13 +3,17 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { attachAuthUser, prisma } from './auth';
 import { apiRouter } from './routes';
+import { ensureSqliteSchema } from './sqliteBootstrap';
 import { seedDatabase } from '../../prisma/seed';
 
 let seedPromise: Promise<void> | null = null;
 
 export function ensureSeeded(): Promise<void> {
   if (!seedPromise) {
-    seedPromise = seedDatabase(false).catch((err) => {
+    seedPromise = (async () => {
+      await ensureSqliteSchema(prisma);
+      await seedDatabase(false);
+    })().catch((err) => {
       seedPromise = null;
       throw err;
     });
@@ -84,6 +88,7 @@ export function attachErrorHandler(app: express.Express) {
     if (!res.headersSent) {
       res.status(500).json({
         error: 'Something went wrong on our server. Please try again.',
+        detail: typeof err?.message === 'string' ? err.message : undefined,
         code: err?.code || undefined,
       });
     }

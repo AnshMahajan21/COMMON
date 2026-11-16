@@ -28,11 +28,10 @@ function createPrismaClient(): PrismaClient {
     process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NOW_REGION
   );
   const rawUrl = process.env.DATABASE_URL?.trim();
+  const isNonTmpFileUrl =
+    !rawUrl || (rawUrl.startsWith('file:') && !rawUrl.startsWith('file:/tmp/'));
 
-  if (
-    isServerless &&
-    (!rawUrl || rawUrl.startsWith('file:./') || rawUrl.startsWith('file:../'))
-  ) {
+  if (isServerless && isNonTmpFileUrl) {
     const tmpDbPath = '/tmp/common-dev.db';
     const needsCopy =
       !fs.existsSync(tmpDbPath) || fs.statSync(tmpDbPath).size === 0;
@@ -48,7 +47,28 @@ function createPrismaClient(): PrismaClient {
         (candidate) => fs.existsSync(candidate) && fs.statSync(candidate).size > 0
       );
       if (source) {
-        fs.copyFileSync(source, tmpDbPath);
+        const stagingPath = `${tmpDbPath}.tmp-${process.pid}`;
+        try {
+          fs.copyFileSync(source, stagingPath);
+          fs.chmodSync(stagingPath, 0o644);
+          fs.renameSync(stagingPath, tmpDbPath);
+        } catch {
+          try {
+            if (fs.existsSync(stagingPath)) fs.unlinkSync(stagingPath);
+          } catch {
+            // Ignore cleanup failure
+          }
+          if (!fs.existsSync(tmpDbPath)) {
+            fs.copyFileSync(source, tmpDbPath);
+            fs.chmodSync(tmpDbPath, 0o644);
+          }
+        }
+      }
+    } else {
+      try {
+        fs.chmodSync(tmpDbPath, 0o644);
+      } catch {
+        // Ignore if permissions cannot be changed
       }
     }
     const tmpUrl = `file:${tmpDbPath}`;
