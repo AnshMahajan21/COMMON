@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { attachAuthUser, prisma } from './auth';
-import { apiRouter } from './routes';
-import { ensureSqliteSchema } from './sqliteBootstrap';
-import { seedDatabase } from '../../prisma/seed';
+import { attachAuthUser, prisma } from './auth.js';
+import { apiRouter } from './routes.js';
+import { ensureSqliteSchema } from './sqliteBootstrap.js';
+import { seedDatabase } from '../../prisma/seed.js';
 
 let seedPromise: Promise<void> | null = null;
 

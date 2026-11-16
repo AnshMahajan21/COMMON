@@ -10,7 +10,7 @@ import {
   requireAuth,
   serializeUserPrivate,
   type AuthenticatedRequest,
-} from './auth';
+} from './auth.js';
 
 const baseRouter = Router();
 const wrapAsync =

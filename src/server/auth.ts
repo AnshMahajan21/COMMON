@@ -86,7 +86,22 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient();
 }
 
-export const prisma = createPrismaClient();
+let prismaInstance: PrismaClient | null = null;
+
+export function getPrisma(): PrismaClient {
+  if (!prismaInstance) {
+    prismaInstance = createPrismaClient();
+  }
+  return prismaInstance;
+}
+
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getPrisma() as any;
+    const value = Reflect.get(client, prop, client);
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 export const SESSION_COOKIE_NAME = 'common_session';
 const SESSION_DURATION_MS = 14 * 24 * 60 * 60 * 1000;

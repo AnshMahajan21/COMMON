@@ -2,7 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
-import { attachErrorHandler, createApiApp } from './src/server/app';
+import { attachErrorHandler, createApiApp } from './src/server/app.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const portFlagIndex = process.argv.indexOf('--port');

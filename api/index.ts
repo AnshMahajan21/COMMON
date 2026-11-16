@@ -1,10 +1,10 @@
 import type { Express, Request, Response } from 'express';
+import { attachErrorHandler, createApiApp } from '../src/server/app.js';
 
 let cachedApp: Express | null = null;
 
-async function getApp(): Promise<Express> {
+function getApp(): Express {
   if (!cachedApp) {
-    const { attachErrorHandler, createApiApp } = await import('../src/server/app');
     const { app } = createApiApp();
     attachErrorHandler(app);
     cachedApp = app;
@@ -14,7 +14,7 @@ async function getApp(): Promise<Express> {
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const app = await getApp();
+    const app = getApp();
     await new Promise<void>((resolve, reject) => {
       let settled = false;
       const done = () => {

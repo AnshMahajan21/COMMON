@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { prisma, hashPassword } from '../src/server/auth';
+import { prisma, hashPassword } from '../src/server/auth.js';
 
 const IMAGES = {
   morningWalk: '/src/assets/images/hero_delhi_morning_walk_1794851444677.jpg',
