@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Fraunces", Georgia, Cambria, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --color-canvas: #F7F5EE;
+  --color-cream: #FEFAE0;
+  --color-light-sage: #E9EDC9;
+  --color-sage: #CCD5AE;
+  --color-peach: #FAEDCD;
+  --color-earth: #D4A373;
+  --color-olive: #2B3322;
+  --color-bark: #5A4D3F;
+
+  /* Warm olive/cream grayscale scale for ReceiptPrinter & surfaces */
+  --color-grayscale-1: #FEFAE0;
+  --color-grayscale-2: #F7F5EE;
+  --color-grayscale-3: #EFEAD6;
+  --color-grayscale-4: #E9EDC9;
+  --color-grayscale-5: #DCE2BF;
+  --color-grayscale-6: #CCD5AE;
+  --color-grayscale-7: #B7C198;
+  --color-grayscale-8: #8F9677;
+  --color-grayscale-9: #6F7359;
+  --color-grayscale-10: #5A4D3F;
+  --color-grayscale-11: #3C4430;
+  --color-grayscale-12: #2B3322;
+
+  /* Readable sage green on dark olive printer screen */
+  --color-green-9: #9BC07B;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: #F7F5EE;
+    color: #2B3322;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid #2B3322;
+    outline-offset: 2px;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.font-serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Liquid glass strictly for mobile bottom nav, map sheet/controls, and sticky action bars */
+.liquid-glass {
+  background: rgba(254, 250, 224, 0.82);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  border: 1px solid rgba(215, 222, 176, 0.85);
+  box-shadow:
+    0 10px 30px -8px rgba(43, 51, 34, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+/* MapLibre calm organic overrides */
+.maplibregl-map {
+  font-family: var(--font-sans);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px !important;
+  background: rgba(254, 250, 224, 0.8) !important;
+  color: #5A4D3F !important;
+  border-radius: 9999px !important;
+  padding: 2px 8px !important;
+  margin: 6px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: #F7F5EE;
+  --foreground: #2B3322;
+  --card: #FEFAE0;
+  --card-foreground: #2B3322;
+  --popover: #FEFAE0;
+  --popover-foreground: #2B3322;
+  --primary: #2B3322;
+  --primary-foreground: #FEFAE0;
+  --secondary: #E9EDC9;
+  --secondary-foreground: #2B3322;
+  --muted: #E9EDC9;
+  --muted-foreground: #5A4D3F;
+  --accent: #FAEDCD;
+  --accent-foreground: #2B3322;
+  --destructive: #8C3B2B;
+  --border: #D7DEB0;
+  --input: #D7DEB0;
+  --ring: #D4A373;
+  --radius: 0.75rem;
+}

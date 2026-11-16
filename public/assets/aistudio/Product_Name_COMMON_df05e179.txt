@@ -1,0 +1,673 @@
+Product Name: COMMON
+
+Product Type: Activity-First Social Discovery Platform
+
+Core Concept:
+
+People often want to meet new people but find it difficult to initiate conversations or build connections with strangers. Traditional social platforms primarily focus on profiles, followers, likes, and online interactions.
+
+COMMON takes a different approach.
+
+Instead of asking users to connect with strangers first, COMMON encourages them to discover something they genuinely enjoy doing and meet people through that shared activity.
+
+The platform follows this core journey:
+
+Interest → Activity → People → Shared Experience → Repeated Interaction → Friendship
+
+Examples of activities could include:
+
+Going for a walk or morning run.
+
+Playing badminton, football, or other sports.
+
+Visiting a café.
+
+Exploring a new place.
+
+Photography walks.
+
+Reading sessions.
+
+Board games.
+
+Cycling.
+
+Hiking and outdoor activities.
+
+Learning a new skill.
+
+Attending workshops.
+
+Music and creative activities.
+
+Study sessions.
+
+Other hobbies and shared interests.
+
+The platform should make it easier for users to find activities, discover like-minded people, participate in shared experiences, and develop friendships naturally.
+
+2. TARGET USERS
+
+The platform should support people who:
+
+Want to meet new people.
+
+Have recently moved to a new city.
+
+Want to find companions for their hobbies.
+
+Want to participate in group activities.
+
+Want to explore their interests with others.
+
+Find it difficult to initiate friendships.
+
+Want to become part of local communities.
+
+Prefer meeting people through shared experiences rather than random social matching.
+
+The platform should support both individual users looking for activities and users who want to organise activities for others.
+
+This is one of the most important sections of COMMON.
+
+Users should be able to discover activities they might want to participate in.
+
+A. Activity Listing
+
+Display activities containing relevant information:
+
+Activity title.
+
+Description or summary.
+
+Activity category.
+
+Date.
+
+Start time.
+
+Duration, if available.
+
+Location.
+
+Organiser information.
+
+Number of participants.
+
+Available capacity, if applicable.
+
+Relevant activity image or media.
+
+B. Activity Categories
+
+Support categories such as:
+
+Sports and Fitness.
+
+Outdoor Activities.
+
+Food and Cafés.
+
+Arts and Creativity.
+
+Music.
+
+Photography.
+
+Gaming.
+
+Reading and Learning.
+
+Travel and Exploration.
+
+Social Gatherings.
+
+Education and Study.
+
+Other Interests.
+
+Categories should be manageable rather than permanently hardcoded wherever practical.
+
+C. Search
+
+Allow users to search activities using relevant information such as:
+
+Activity name.
+
+Category.
+
+Keywords.
+
+Location.
+
+D. Filtering and Sorting
+
+Allow users to narrow down activities based on available data:
+
+Category.
+
+Location.
+
+Date.
+
+Activity type.
+
+Available spaces.
+
+Upcoming activities.
+
+Provide useful sorting options, such as upcoming activities and recently created activities.
+
+E. Activity Interaction
+
+Users should be able to:
+
+Open an activity.
+
+View its details.
+
+Join an activity.
+
+Leave an activity.
+
+Identify activities they have already joined.
+
+View participant information where permitted.
+
+Access the organiser's profile.
+
+Prevent users from joining the same activity multiple times.
+
+Respect the activity's participant capacity when a maximum capacity is defined.
+
+Provide appropriate feedback when an activity is full, cancelled, unavailable, or no longer accepting participants.
+
+Every activity should have an individual detail page.
+
+Display:
+
+Activity title.
+
+Full description.
+
+Category.
+
+Date and time.
+
+Location.
+
+Organiser details.
+
+Participant count.
+
+Participant capacity, if defined.
+
+Participant information.
+
+Activity status.
+
+Join or leave action.
+Required functionality
+
+Users can view all relevant information before joining.
+
+Users can join an available activity.
+
+Users can leave an activity they previously joined.
+
+The participant count updates after successful joining or leaving.
+
+The same user cannot join multiple times.
+
+Users cannot join an activity that has reached its capacity.
+
+Activity organisers should be identifiable.
+
+Activity status should be reflected accurately.
+
+Unauthenticated users should be directed to authentication before performing restricted actions.
+
+The activity detail page should clearly communicate the experience a user is joining.
+
+7. ACTIVITY CREATION AND MANAGEMENT
+
+COMMON should support users who want to organise activities for other people.
+
+Provide activity creation functionality.
+
+The activity creation process should collect:
+
+Activity title.
+
+Description.
+
+Category.
+
+Date.
+
+Start time.
+
+Duration, if applicable.
+
+Location.
+
+Participant capacity, if applicable.
+
+Relevant image or media, if supported.
+
+Activity management
+
+The activity organiser should be able to:
+
+Create an activity.
+
+View activities they have organised.
+
+Edit their own activity.
+
+Cancel or delete their own activity.
+
+View participants.
+
+Monitor participant count.
+
+Only the activity organiser or an authorised administrator should be allowed to modify or cancel an activity.
+
+Validate required fields and prevent invalid dates, times, or participant capacities.
+
+8. USER AUTHENTICATION
+
+Implement user authentication with separate registration and login pages.
+
+A. Sign Up — /signup
+
+Collect appropriate registration information:
+
+Full name.
+
+Email address.
+
+Password.
+
+Password confirmation, if required.
+
+Support validation for:
+
+Required fields.
+
+Valid email addresses.
+
+Password requirements.
+
+Password confirmation.
+
+Duplicate accounts.
+
+After successful registration, allow the user to access the application.
+
+B. Login — /login
+
+Provide:
+
+Email address.
+
+Password.
+
+Login action.
+
+Appropriate validation.
+
+Error handling.
+
+Navigation to registration.
+
+C. Authentication Behaviour
+
+Maintain authenticated user sessions.
+
+Protect routes that require authentication.
+
+Redirect unauthenticated users when they attempt restricted actions.
+
+Provide a logout function.
+
+Display appropriate authentication feedback.
+
+Prevent unauthorised access to another user's private information.
+
+9. USER PROFILE — /profile
+
+Every registered user should have a profile representing their interests and activity participation.
+
+A. Profile Information
+
+Include:
+
+Profile picture.
+
+Full name.
+
+Short biography.
+
+Location.
+
+Interests.
+
+Hobbies.
+
+Joined date or other appropriate account information.
+
+B. Interests
+
+Users should be able to select and manage interests that represent the activities they enjoy.
+
+Examples:
+
+Sports.
+
+Photography.
+
+Music.
+
+Reading.
+
+Travel.
+
+Fitness.
+
+Gaming.
+
+Art.
+
+Food.
+
+Learning.
+
+Outdoor activities.
+
+Interests should be reusable for activity discovery and future recommendations.
+
+C. Profile Management
+
+Users should be able to:
+
+View their profile.
+
+Edit their personal information.
+
+Update their profile picture, if supported.
+
+Add or remove interests.
+
+View activities they have joined.
+
+View activities they have organised.
+
+Users should only be allowed to edit their own profile.
+
+10. PEOPLE DISCOVERY
+
+People discovery is an important part of COMMON, but it must follow the activity-first philosophy.
+
+The objective is not simply to display random profiles.
+
+The platform should help users discover people through shared interests and participation in similar activities.
+
+Possible discovery information includes:
+
+Name.
+
+Profile picture.
+
+Location, where appropriate.
+
+Shared interests.
+
+Activities they participate in.
+
+Common categories or hobbies.
+
+Users should be able to open another user's public profile and understand their interests and participation.
+
+The discovery system should support finding people with common interests.
+
+Do not turn this into a swipe-based dating or matchmaking application.
+
+11. COMMUNITIES AND GROUPS
+
+Support the concept of communities formed around shared interests and activities.
+
+A community or circle can represent people who share a common interest or repeatedly participate in similar activities.
+
+Examples:
+
+Photography Community.
+
+Weekend Cycling Group.
+
+Book Lovers.
+
+Football Community.
+
+Hiking Group.
+
+Board Game Community.
+
+The functionality should support the relationship between interests, activities, and groups.
+
+Where implemented, users should be able to:
+
+Discover relevant communities.
+
+View community information.
+
+See related activities.
+
+Join or leave a community.
+
+View its members.
+
+Access community-related interactions.
+
+Community membership and activity participation should be treated as separate concepts.
+
+12. MESSAGING AND COMMUNICATION
+
+Include messaging as a platform capability for facilitating communication between connected users or activity participants.
+
+The communication functionality should support:
+
+Viewing conversations.
+
+Opening a conversation.
+
+Sending messages.
+
+Viewing previous messages.
+
+Displaying message timestamps.
+
+Identifying the sender.
+
+Maintaining conversation history.
+
+Messaging should support communication related to shared activities and connections.
+
+Do not allow unauthorised users to access private conversations.
+
+If real-time messaging is not supported by the existing backend, establish a functional implementation appropriate to the available technology and clearly distinguish it from real-time functionality.
+
+13. USER NAVIGATION AND APPLICATION FLOW
+
+Users should be able to move between the main sections of COMMON.
+
+The application should provide access to:
+
+Homepage.
+
+Activity discovery.
+
+Activity details.
+
+Activity creation and management.
+
+People discovery.
+
+Communities.
+
+User profile.
+
+Authentication.
+
+Messaging, where implemented.
+
+Navigation should reflect authentication status and available user permissions.
+
+Unauthenticated user:
+
+Can visit the homepage, browse publicly available activities, read activity details, and access login or registration.
+
+Authenticated user:
+
+Can manage their profile, join and leave activities, create activities, discover people, and access other authorised features.
+
+Activity organiser(can be a normal authenticated user too):
+
+Can additionally manage activities they created.
+
+14. ABOUT PAGE — /about
+
+Explain the purpose and philosophy of COMMON.
+
+Include:
+
+Why COMMON exists.
+
+The problem of making meaningful social connections.
+
+Why shared activities can help people connect.
+
+The activity-first approach.
+
+How the platform works.
+
+The long-term vision of building communities through shared experiences.
+
+Keep the explanation consistent with the actual platform functionality.
+
+16. SEARCH, FILTERING AND DATA ACCURACY
+
+Search and filtering should operate on actual application data.
+
+Requirements:
+
+Search should return relevant activities.
+
+Category filtering should work correctly.
+
+Location filtering should use available location data.
+
+Date filtering should return appropriate activities.
+
+Activity counts should remain accurate.
+
+Joining and leaving should update participant relationships correctly.
+
+User profiles should display their actual activities and interests.
+
+Organisers should see their own created activities.
+
+Avoid hardcoded results being presented as live user data.
+
+If mock data is used during development, keep it clearly separated from the actual backend and make the application easy to connect to real data later.
+
+18. VALIDATION, SECURITY AND ERROR HANDLING
+
+Implement proper validation and error handling throughout the application.
+
+Important requirements:
+
+Validate forms.
+
+Protect authenticated routes.
+
+Enforce user ownership and permissions.
+
+Prevent duplicate activity participation.
+
+Prevent invalid activity creation.
+
+Prevent unauthorised activity editing.
+
+Protect private user information.
+
+Protect private conversations.
+
+Handle unavailable or deleted activities.
+
+Handle empty search results.
+
+Display useful error messages.
+
+Provide loading and success feedback.
+
+Handle backend failures without breaking the application.
+
+Never rely only on frontend validation for security-sensitive operations.
+
+19. RESPONSIVENESS AND ACCESSIBILITY
+
+The application must work across:
+
+Desktop computers.
+
+Laptops.
+
+Tablets.
+
+Mobile devices.
+
+All major functionality should remain accessible across different screen sizes.
+
+Ensure:
+
+Semantic page structure.
+
+Accessible form labels.
+
+Keyboard navigation.
+
+Appropriate input validation messages.
+
+Meaningful image alternative text.
+
+Accessible interactive controls.
+
+Proper handling of loading and error states.
+
+Do not sacrifice functionality on smaller screens.
+
+22. IMPORTANT PRODUCT PRINCIPLES
+
+These principles must guide implementation:
+
+COMMON is activity-first, not profile-first.
+
+Shared experiences are the foundation of social discovery.
+
+Users should be able to discover activities before being pushed to connect with strangers.
+
+Activity participation should be a central platform interaction.
+
+Profiles should communicate interests and participation.
+
+Communities should form around shared interests and experiences.
+
+The platform should encourage meaningful interactions rather than superficial engagement.
+
+The application should not become a dating application.
+
+The application should not become a generic social media feed.
+
+The core experience should remain focused on helping people find common ground.
+

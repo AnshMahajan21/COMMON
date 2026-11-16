@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <filter id="common-paper-grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch" />
+    <feColorMatrix type="matrix" values="0 0 0 0 0.83  0 0 0 0 0.64  0 0 0 0 0.45  0 0 0 0.16 0" />
+  </filter>
+  <rect width="240" height="240" fill="#FEFAE0" opacity="0.35" />
+  <rect width="240" height="240" filter="url(#common-paper-grain)" opacity="0.45" />
+</svg>

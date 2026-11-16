@@ -1,0 +1,6 @@
+{
+  "name": "COMMON",
+  "description": "An activity-first social discovery platform where people meet through shared real-life experiences.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
