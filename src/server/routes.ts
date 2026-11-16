@@ -12,7 +12,22 @@ import {
   type AuthenticatedRequest,
 } from './auth';
 
-export const apiRouter = Router();
+const baseRouter = Router();
+const wrapAsync =
+  (fn: (...args: any[]) => any) =>
+  (req: any, res: any, next: any) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
+
+for (const method of ['get', 'post', 'put', 'patch', 'delete'] as const) {
+  const original = (baseRouter[method] as any).bind(baseRouter);
+  (baseRouter as any)[method] = (path: any, ...handlers: any[]) =>
+    original(
+      path,
+      ...handlers.map((h) => (typeof h === 'function' && h.length < 4 ? wrapAsync(h) : h))
+    );
+}
+
+export const apiRouter = baseRouter;
 
 const NEIGHBORHOOD_PRESETS = [
   { name: 'Lodhi Colony', latitude: 28.5931, longitude: 77.2197 },

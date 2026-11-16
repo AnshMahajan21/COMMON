@@ -34,13 +34,19 @@ function createPrismaClient(): PrismaClient {
     (!rawUrl || rawUrl.startsWith('file:./') || rawUrl.startsWith('file:../'))
   ) {
     const tmpDbPath = '/tmp/common-dev.db';
-    if (!fs.existsSync(tmpDbPath)) {
+    const needsCopy =
+      !fs.existsSync(tmpDbPath) || fs.statSync(tmpDbPath).size === 0;
+    if (needsCopy) {
       const bundledCandidates = [
         path.resolve(process.cwd(), 'prisma/dev.db'),
         path.resolve(process.cwd(), 'dev.db'),
+        path.resolve(MODULE_DIR, '../prisma/dev.db'),
         path.resolve(MODULE_DIR, '../../prisma/dev.db'),
+        '/var/task/prisma/dev.db',
       ];
-      const source = bundledCandidates.find((candidate) => fs.existsSync(candidate));
+      const source = bundledCandidates.find(
+        (candidate) => fs.existsSync(candidate) && fs.statSync(candidate).size > 0
+      );
       if (source) {
         fs.copyFileSync(source, tmpDbPath);
       }

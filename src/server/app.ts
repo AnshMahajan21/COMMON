@@ -58,12 +58,13 @@ export function createApiApp() {
 
   app.use('/api', attachAuthUser);
 
-  app.get('/api/health', async (_req, res, next) => {
+  app.get('/api/health', async (_req, res) => {
     try {
       await prisma.$queryRaw`SELECT 1`;
       res.json({ ok: true });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      console.error('Healthcheck error:', err);
+      res.status(500).json({ ok: false, error: err?.message || 'Database check failed' });
     }
   });
 
@@ -81,7 +82,10 @@ export function attachErrorHandler(app: express.Express) {
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('Server error:', err);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Something went wrong on our server. Please try again.' });
+      res.status(500).json({
+        error: 'Something went wrong on our server. Please try again.',
+        code: err?.code || undefined,
+      });
     }
   });
 }
