@@ -82,7 +82,7 @@ export async function apiFetch<T>(url: string, options: RequestInit = {}): Promi
       data.error ||
         (res.status === 401
           ? 'Authentication required. Please sign in.'
-          : 'Request could not be completed. Please try again.'),
+          : `Request could not be completed (HTTP ${res.status}). Please try again.`),
       res.status,
       data.fieldErrors
     );

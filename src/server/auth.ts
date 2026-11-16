@@ -5,7 +5,23 @@ import { fileURLToPath } from 'url';
 import type { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 
-const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
+function getModuleDir(): string {
+  try {
+    if (typeof __dirname === 'string') return __dirname;
+  } catch {
+    // Ignore in strict ESM
+  }
+  try {
+    if (typeof import.meta !== 'undefined' && typeof import.meta.url === 'string' && import.meta.url) {
+      return path.dirname(fileURLToPath(import.meta.url));
+    }
+  } catch {
+    // Ignore in CJS
+  }
+  return process.cwd();
+}
+
+const MODULE_DIR = getModuleDir();
 
 function createPrismaClient(): PrismaClient {
   const isServerless = Boolean(
